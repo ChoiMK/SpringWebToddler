@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beansProjectDescription>
+	<version>1</version>
+	<pluginVersion><![CDATA[3.6.3.201411271034-RELEASE]]></pluginVersion>
+	<configSuffixes>
+		<configSuffix><![CDATA[xml]]></configSuffix>
+	</configSuffixes>
+	<enableImports><![CDATA[false]]></enableImports>
+	<configs>
+		<config>src/main/webapp/WEB-INF/firstDispatcher-servlet.xml</config>
+		<config>src/main/webapp/WEB-INF/secondDispatcher-servlet.xml</config>
+		<config>src/main/resources/kr/or/ddit/spring/application-ibatis.xml</config>
+		<config>src/main/resources/kr/or/ddit/spring/application-props.xml</config>
+		<config>src/main/resources/kr/or/ddit/spring/application-config.xml</config>
+		<config>src/main/webapp/WEB-INF/context/servlet-commons.xml</config>
+		<config>src/main/webapp/WEB-INF/context/mvc-config.xml</config>
+		<config>src/main/resources/kr/or/ddit/spring/application-i18n.xml</config>
+		<config>src/main/webapp/WEB-INF/context/mvc-transaction.xml</config>
+		<config>src/main/resources/kr/or/ddit/spring/application-viewresolver.xml</config>
+		<config>src/main/webapp/WEB-INF/context/mvc-converter.xml</config>
+		<config>src/main/resources/kr/or/ddit/spring/application-convert.xml</config>
+		<config>src/main/resources/kr/or/ddit/spring/application-file.xml</config>
+		<config>src/main/webapp/WEB-INF/context/mvc-tiles.xml</config>
+	</configs>
+	<autoconfigs>
+	</autoconfigs>
+	<configSets>
+	</configSets>
+</beansProjectDescription>

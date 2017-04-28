@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap     
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="freeboard">
+	<typeAlias alias="freeboardVO" type="kr.or.ddit.vo.FreeBoardVO"/>
+	<typeAlias alias="fileitemVO" type="kr.or.ddit.vo.FileItemVO"/>
+	
+	<resultMap class="freeboardVO" id="freeboardMap">
+		<result property="bo_mail" column="bo_mail"/>
+		<result property="bo_ip" column="bo_ip"/>
+		<result property="bo_content" column="bo_content"/>
+		<result property="bo_hit" column="bo_hit"/>
+		<result property="bo_reg_date" column="bo_reg_date"/>
+		<result property="bo_status" column="bo_status"/>
+		<result property="bo_group" column="bo_group"/>
+		<result property="bo_seq" column="bo_seq"/>
+		<result property="bo_depth" column="bo_depth"/>
+		<result property="bo_no" column="bo_no"/>
+		<result property="bo_title" column="bo_title"/>
+		<result property="bo_writer" column="bo_writer"/>
+		<result property="bo_nickname" column="bo_nickname"/>
+		<result property="bo_pwd" column="bo_pwd"/>
+		<result property="attachFileItemList" column="bo_no" select="freeboard.fileItemInfo"/>
+	</resultMap>
+	
+	<sql id="selectAll">
+       SELECT *
+       FROM FREEBOARD
+       WHERE BO_STATUS = 'y'
+	</sql>
+	<sql id="searchCondition">
+		<dynamic prepend="AND">
+       		<isNotEmpty property="search_keyword">
+       			<isEqual property="search_keycode" compareValue="TOTAL"
+       				open="(" close=")">
+       				BO_TITLE LIKE '%'||#bo_title#||'%'
+       				OR BO_CONTENT LIKE '%'||#bo_CONTENT#||'%'
+       				OR BO_WRITER '%'||#bo_writer#||'%'
+       			</isEqual>
+       			<isEqual property="search_keycode" compareValue="CONTENT">
+       				BO_CONTENT LIKE '%'||#bo_CONTENT#||'%'
+       			</isEqual>
+       			<isEqual property="search_keycode" compareValue="WRITER">
+       				BO_WRITER '%'||#bo_writer#||'%'
+       			</isEqual>
+       		</isNotEmpty>
+       </dynamic>
+	</sql>
+	<statement id="fileItemInfo" resultClass="fileitemVO">
+		SELECT *
+		  FROM FILEITEM
+		 WHERE FILE_BO_NO = #bo_no#
+	</statement>
+
+	<select id="boardInfo" resultMap="freeboardMap" parameterClass="map">
+		<include refid="selectAll"/>  
+		AND BO_NO = #bo_no#
+	</select>
+
+	<select id="boardList" resultClass="freeboardVO" parameterClass="map">
+		SELECT B.*
+		  FROM	(SELECT ROWNUM rnum, A.*
+				 FROM (<include refid="selectAll"/>
+				       <include refid="searchCondition"/>
+				       ORDER BY BO_GROUP, BO_SEQ DESC) A) B
+         WHERE 1=1
+         <dynamic prepend="AND">
+         	<isNotEmpty property="startCount">
+         		<isNotEmpty property="endCount">
+         		    <![CDATA[
+	         			B.RNUM <= #startCount# 
+	         			AND B.RNUM >= #endCount#
+         			]]> 
+         		</isNotEmpty>
+         	</isNotEmpty>
+         </dynamic>
+         ORDER BY B.RNUM DESC				       	
+	</select>
+	
+	<update id="updateBoard" parameterClass="freeboardVO">
+		UPDATE FREEBOARD
+		   SET BO_TITLE = #bo_title#,
+		   	   BO_NICKNAME = #bo_nickname#,
+		   	   BO_PWD = #bo_pwd#,
+		   	   BO_MAIL = #bo_mail#,
+		   	   BO_CONTENT = #bo_content#
+		  WHERE BO_NO = #bo_no#
+	</update>
+	
+	<update id="deleteBoard" parameterClass="map">
+		UPDATE FREEBOARD
+		   SET BO_STATUS = 'n'
+		 WHERE BO_NO = #bo_no#  
+	</update>
+	
+	<insert id="insertBoard" parameterClass="freeboardVO">
+		<selectKey keyProperty="bo_no" resultClass="string">
+			SELECT FREEBOARD_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO FREEBOARD
+			(BO_NO, BO_TITLE, BO_NICKNAME, BO_WRITER, BO_PWD, BO_MAIL, BO_CONTENT, BO_GROUP, BO_IP)
+		values
+			(#bo_no#, #bo_title#, #bo_nickname#, #bo_writer#, #bo_pwd#, #bo_mail#, #bo_content#, #bo_no#, #bo_ip#) 
+	</insert>
+	
+	<insert id="insertFileItem" parameterClass="fileitemVO">
+		<selectKey keyProperty="file_seq">
+			SELECT FILEITEM_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO FILEITEM(FILE_SEQ
+							,FILE_BO_NO
+							,FILE_NAME
+							,FILE_SAVE_NAME
+							,FILE_CONTENT_TYPE
+							,FILE_SIZE)
+				    VALUES(#file_seq#  
+             	          ,#file_bo_no#
+                          ,#file_name#
+                          ,#file_save_name#
+                          ,#file_content_type#
+                          ,#file_size#)
+	</insert>
+	
+	<update id="updateHit" parameterClass="map">
+		UPDATE FREEBOARD
+		   SET BO_HIT = BO_HIT + 1
+		 WHERE BO_NO = #bo_no#
+	</update>
+	
+	<update id="updateDownloadHit" parameterClass="map">
+		UPDATE FILEITEM
+		   SET FILE_DOWN_HIT = FILE_DOWN_HIT + 1 
+		 WHERE FILE_SEQ = #file_seq#
+	</update>
+	
+	<select id="fileitemInfo" parameterClass="map" resultClass="fileitemVO">
+		SELECT *
+		  FROM FILEITEM
+		 WHERE FILE_SEQ = #file_seq#
+	</select>
+	
+	<select id="incrementSeq" parameterClass="freeboardVO" resultClass="string">
+		SELECT MAX(NVL(bo_seq,0))+1 
+		  FROM FREEBOARD
+		 WHERE BO_GROUP = #bo_group#
+	</select>
+	
+	<update id="updateSeq" parameterClass="freeboardVO">
+		UPDATE FREEBOARD
+		  SET  BO_SEQ = BO_SEQ + 1
+		 WHERE BO_GROUP = #bo_group#
+		   AND BO_SEQ > #bo_seq#
+	</update>
+	
+	<insert id="insertReplyInfo" parameterClass="freeboardVO">
+		<selectKey keyProperty="bo_no">
+			SELECT FREEBOARD_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO FREEBOARD
+			(BO_NO, BO_TITLE, BO_NICKNAME, BO_WRITER, BO_PWD, BO_MAIL, BO_CONTENT, BO_GROUP, BO_IP, BO_DEPTH, BO_SEQ)
+		values
+			(#bo_no#, #bo_title#, #bo_nickname#, #bo_writer#, #bo_pwd#, #bo_mail#, #bo_content#, #bo_group#, #bo_ip#, #bo_depth#, #bo_seq#)
+	</insert>
+	
+	<select id="totalCount" parameterClass="map" resultClass="int">
+		SELECT COUNT(BO_NO)
+		  FROM FREEBOARD
+		 WHERE BO_STATUS = 'y'
+		<include refid="searchCondition"/>
+	</select>
+</sqlMap>    
+
+
+
+
+
+
+
+
+
+
+
+

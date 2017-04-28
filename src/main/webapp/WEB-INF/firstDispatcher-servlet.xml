@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
+
+	<!-- 
+		클라이언트 요청 : http://localhost/SpringWebToddler/first/hello.first
+		      프론트 컨트롤러 : DispatcherServlet
+		      커맨드 컨트롤러 : 특정 클래스를 커맨드 컨트롤러 역활 수행토록 설정.
+		                       커맨드 컨트롤러 자격 : 1. 빈 등록
+		                                           2. 클래스 상단에 @Controller가 선언
+		      
+	    IoC(Inversion of Control) : 스프링 프레임웍 내에 선언된 자원(빈:클래스)의 인스턴스화를
+	                               스프링 프레임웍이 수행 및 제공
+	                             DL(Dependency Lookup) : 빈 등록시 선언된 자원의 존재 유무 체크
+	                             DI(Dependency Injection) : 빈으로 등록된 자원의 인스턴스를 제공
+	 -->
+	 <bean id="firstController" class="kr.or.ddit.first.controller.FirstController"></bean>
+	 
+</beans>
+
+
+
+
+
+
+
+
+
+
+
+
